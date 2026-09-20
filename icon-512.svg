@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="100" fill="#0b57d0"/>
+<rect x="116" y="116" width="280" height="280" rx="28" fill="white"/>
+<path d="M150 150h72v72h-72zM290 150h72v72h-72zM150 290h72v72h-72z" fill="#0b57d0"/>
+<path d="M260 260h34v34h-34zM328 260h34v34h-34zM260 328h34v34h-34zM328 328h34v34h-34z" fill="#0b57d0"/>
+<path d="M246 150h34v72h-34zM150 246h72v34h-72z" fill="#0b57d0"/>
+<text x="256" y="455" text-anchor="middle" font-family="Arial" font-size="42" font-weight="700" fill="white">UPI</text>
+</svg>

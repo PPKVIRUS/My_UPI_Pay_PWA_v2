@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b57d0">
+  <meta name="description" content="Fast exact-amount UPI QR generator for merchants">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>My UPI Pay</title>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="brand">My UPI Pay <span class="v2badge">V2</span></div>
+      <div class="subbrand" id="shopSubtitle">Fast exact-amount QR</div>
+    </div>
+    <button class="icon-btn" id="settingsBtn" aria-label="Settings">⚙️</button>
+  </header>
+
+  <main class="container">
+    <section class="card primary-card">
+      <div class="destination-row">
+        <div>
+          <div class="label">Payment destination</div>
+          <div class="upi-display" id="upiDisplay">Not set</div>
+        </div>
+        <button class="small-btn" id="changeDestBtn">Change</button>
+      </div>
+
+      <label class="label" for="amount">Enter exact amount</label>
+      <div class="amount-wrap">
+        <span>₹</span>
+        <input id="amount" inputmode="decimal" autocomplete="off" placeholder="0.00">
+      </div>
+
+      <button class="primary-btn" id="generateBtn">GENERATE PAYMENT QR</button>
+      <div class="hint">Customer scans this QR. The amount is included in the UPI payment request.</div>
+    </section>
+
+    <div class="optional-home hidden" id="optionalHome"></div>
+    <section class="quick-grid hidden" id="quickActions">
+      <button class="action-card" id="scanBtn"><span class="action-icon">📷</span><b>Scan Static QR</b><small>Set / change UPI</small></button>
+      <button class="action-card" id="manualBtn"><span class="action-icon">⌨️</span><b>Enter UPI ID</b><small>Save or use once</small></button>
+      <button class="action-card" id="historyBtn"><span class="action-icon">🧾</span><b>History</b><small>QR & payment records</small></button>
+    </section>
+
+    <section class="info-card">
+      <b>Payment confirmation</b>
+      <p>Generating a QR does <strong>not</strong> prove that money was received. Keep using your Canara UPI sound box/merchant confirmation. After you hear the successful payment announcement, mark the transaction as received.</p>
+    </section>
+  </main>
+
+  <div class="modal hidden" id="qrModal">
+    <div class="modal-card qr-modal-card">
+      <button class="close-btn" data-close="qrModal">×</button>
+      <div class="modal-title">Collect ₹<span id="qrAmount">0.00</span></div>
+      <div class="qr-box" id="qrcode"></div>
+      <div class="qr-destination" id="qrDestination"></div>
+      <div class="ref-text">Ref: <span id="qrRef"></span></div>
+      <div class="status-note">Wait for your sound box/merchant confirmation before marking this payment received.</div>
+      <div class="modal-actions">
+        <button class="secondary-btn" id="downloadQrBtn">SAVE QR</button>
+        <button class="success-btn" id="markPaidBtn">PAYMENT RECEIVED</button>
+      </div>
+      <button class="new-payment-btn" id="newPaymentBtn">NEW PAYMENT</button>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="destModal">
+    <div class="modal-card">
+      <button class="close-btn" data-close="destModal">×</button>
+      <div class="modal-title">Payment Destination</div>
+      <button class="wide-btn" id="scanDestBtn">📷 Scan Existing Static QR</button>
+      <button class="wide-btn" id="manualDestBtn">⌨️ Enter UPI ID Manually</button>
+      <div class="current-box">Current: <b id="currentDestText">Not set</b></div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="manualModal">
+    <div class="modal-card">
+      <button class="close-btn" data-close="manualModal">×</button>
+      <div class="modal-title">Enter UPI ID</div>
+      <input class="text-input" id="manualUpi" placeholder="example@upi" autocomplete="off">
+      <input class="text-input" id="manualName" placeholder="Merchant / shop name (optional)" autocomplete="off">
+      <div class="modal-actions two">
+        <button class="secondary-btn" id="useOnceBtn">USE ONCE</button>
+        <button class="primary-btn" id="saveUpiBtn">SAVE AS DEFAULT</button>
+      </div>
+      <div class="small-note">“Use Once” is temporary and will not replace your saved destination.</div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="scannerModal">
+    <div class="modal-card scanner-card">
+      <button class="close-btn" id="stopScannerBtn">×</button>
+      <div class="modal-title">Scan Static UPI QR</div>
+      <div id="reader"></div>
+      <div class="scanner-help">Allow camera access. You can also choose a QR image if camera scanning is unavailable.</div>
+      <input type="file" id="qrImageInput" accept="image/*" hidden>
+      <button class="secondary-btn wide" id="chooseImageBtn">CHOOSE QR IMAGE</button>
+      <div class="scan-result" id="scanResult"></div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="historyModal">
+    <div class="modal-card history-card">
+      <button class="close-btn" data-close="historyModal">×</button>
+      <div class="modal-title">History</div>
+      <div class="history-list" id="historyList"></div>
+      <button class="danger-btn wide" id="clearHistoryBtn">CLEAR HISTORY</button>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="settingsModal">
+    <div class="modal-card">
+      <button class="close-btn" data-close="settingsModal">×</button>
+      <div class="modal-title">Settings</div>
+      <label class="label">Shop / merchant name</label>
+      <input class="text-input" id="shopName" placeholder="My Shop">
+      <label class="label">Default UPI ID</label>
+      <input class="text-input" id="settingsUpi" placeholder="example@upi">
+      <label class="label">Default merchant name for UPI QR</label>
+      <input class="text-input" id="settingsMerchant" placeholder="My Shop">
+      <div class="settings-section">
+        <div class="settings-heading">Home screen options</div>
+        <label class="check-row"><input type="checkbox" id="showQuickAmounts"> Show one-tap amount buttons</label>
+        <div id="quickAmountSettings" class="hidden">
+          <div class="small-note">Enter up to 6 common amounts, separated by commas.</div>
+          <input class="text-input" id="quickAmounts" placeholder="50,100,500,1000">
+        </div>
+        <label class="check-row"><input type="checkbox" id="showQuickActions"> Show Scan / Manual / History buttons</label>
+      </div>
+      <button class="primary-btn wide" id="saveSettingsBtn">SAVE SETTINGS</button>
+      <button class="danger-btn wide" id="clearDestinationBtn">CLEAR SAVED DESTINATION</button>
+      <div class="small-note">Changing the destination affects future QR codes only. Always check the destination shown before displaying a QR to a customer.</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
